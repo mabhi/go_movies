@@ -1,0 +1,69 @@
+version: '3'
+services:
+  nginx:
+    depends_on:
+      - movies_api
+      - movies_client
+      - movies_db
+    restart: always
+    image: go_movies_nginx:v1
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - '3050:80'
+    networks:
+      - movie_net
+  # postgres definition start ----
+  movies_db:
+    image: postgres
+    restart: always
+    environment:      
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: movies
+      POSTGRES_USER: root
+    volumes:
+      - .dbdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'  
+    networks:
+      - movie_net   
+  # backend api definition start ----
+  movies_api:
+    depends_on:
+      - movies_db
+    image: go-be:v0.0.1
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./go-movies-be
+    volumes:
+      - ./go-movies-be:/usr/app  
+    ports:
+      - '3001:3001'  
+    environment:
+      API_PORT: 3001
+      DB_HOST: movies_db
+      DB_PORT: 5432
+      DB_DATABASE: movies
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    networks:
+      - movie_net
+  # client front end definition start ----
+  movies_client:
+    depends_on:
+      - movies_api
+    stdin_open: true
+    image: go-fe:v0.0.1
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./go-movies-fe
+    volumes:
+      - /usr/app/node_modules
+      - ./go-movies-fe:/usr/app
+    ports:
+      - '3000:3000'
+    networks:
+      - movie_net
+networks:
+  movie_net:
