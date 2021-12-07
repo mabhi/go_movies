@@ -17,9 +17,10 @@ func Setup(app *fiber.App) {
 	v1.Get("/movies", controllers.GetMovies)
 	v1.Get("/genres", controllers.GetGenres)
 	v1.Get("/movies/:genre_id", controllers.GetMoviesByGenre)
+	v1.Post("/graphql", controllers.MoviesGraphql)
 
-	admin.Post("/admin/editmovie", controllers.InsertMovie)
-	admin.Put("/admin/editmovie/:id", controllers.EditMovie)
-	admin.Delete("/admin/deletemovie/:id", controllers.DeleteMovie)
+	admin.Post("/editmovie", controllers.InsertMovie)
+	admin.Put("/editmovie/:id", controllers.EditMovie)
+	admin.Delete("/deletemovie/:id", controllers.DeleteMovie)
 
 }
